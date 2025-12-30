@@ -1,0 +1,89 @@
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+.pnp.*
+
+# Build outputs
+dist/
+build/
+.tmp/
+out/
+coverage/
+*.log
+*.tsbuildinfo
+
+# Next.js / Vite / other frameworks (if present)
+.next/
+.nuxt/
+.vite/
+
+# Environment
+.env
+.env.*
+!.env.example
+.local
+
+# Shopify / CLI / extension artifacts
+.shopify-cli.yml
+.shopify/
+.shopify-cli/
+.shopify-*
+extensions/.cache
+.extensions/
+*.extension/
+
+# Tunnels / local certs
+.ngrok/
+.ngrok2/
+*.pem
+*.key
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Misc
+coverage/
+reports/
+.cache/
+# Environment Configuration
+.env
+.env.*
+
+# Dependency directory
+node_modules
+
+# Test coverage directory
+coverage
+
+# Ignore Apple macOS Desktop Services Store
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# ngrok tunnel file
+config/tunnel.pid
+
+# vite build output
+dist/
+
+# extensions build output
+extensions/*/build
+
+# Node library SQLite database
+web/database.sqlite
+
+# Ignore shopify files created during app dev
+.shopify/*
+.shopify.lock

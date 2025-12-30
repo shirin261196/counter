@@ -1,124 +1,141 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+  Page,
+  Card,
+  FormLayout,
+  TextField,
+  Button,
+  DatePicker,
+  Stack,
+  Banner,
+} from "@shopify/polaris";
+
+function combineDateAndTime(dateObj, timeStr) {
+  // timeStr expected as HH:MM (24h). If empty, default to 00:00
+  const [h = "0", m = "0"] = (timeStr || "").split(":");
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth();
+  const day = dateObj.getDate();
+  const d = new Date(year, month, day, parseInt(h, 10), parseInt(m, 10));
+  return d.toISOString();
+}
 
 export default function TimersPage() {
   const [shop, setShop] = useState(null);
-  const [timers, setTimers] = useState([]);
+  const [productId, setProductId] = useState("");
+  const [message, setMessage] = useState("");
+  const [urgencyMinutes, setUrgencyMinutes] = useState(5);
+
+  // DatePicker state: use single-date selection stored as {start, end}
+  const today = new Date();
+  const [startDate, setStartDate] = useState({ start: today, end: today });
+  const [endDate, setEndDate] = useState({ start: today, end: today });
+  const [startTime, setStartTime] = useState("12:00");
+  const [endTime, setEndTime] = useState("13:00");
+
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ productId: "", startTime: "", endTime: "", message: "", urgencyMinutes: 5 });
+  const [success, setSuccess] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Shopify admin will usually provide the shop in the URL as ?shop=... when loading the app
     const params = new URLSearchParams(window.location.search);
     const s = params.get("shop");
     setShop(s);
-    if (s) fetchTimers(s);
   }, []);
 
-  async function fetchTimers(shopDomain) {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/timer/${encodeURIComponent(shopDomain)}`);
-      const data = await res.json();
-      if (res.ok && data.timers) setTimers(data.timers);
-      else setError(data.error || "Failed to fetch timers");
-    } catch (err) {
-      setError(String(err));
-    } finally {
-      setLoading(false);
-    }
-  }
+  const handleCreate = useCallback(
+    async (event) => {
+      event.preventDefault();
+      setError(null);
+      setSuccess(null);
+      setLoading(true);
+      try {
+        // build ISO datetimes
+        const sIso = combineDateAndTime(startDate.start, startTime);
+        const eIso = combineDateAndTime(endDate.start, endTime);
 
-  async function createTimer(e) {
-    e.preventDefault();
-    setError(null);
-    try {
-      const body = { ...form };
-      if (shop) body.storeDomain = shop;
-      const res = await fetch(`/api/timer`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || JSON.stringify(data));
-      setForm({ productId: "", startTime: "", endTime: "", message: "", urgencyMinutes: 5 });
-      fetchTimers(shop);
-    } catch (err) {
-      setError(String(err));
-    }
-  }
+        const body = {
+          productId,
+          startTime: sIso,
+          endTime: eIso,
+          message,
+          urgencyMinutes: Number(urgencyMinutes),
+        };
+        if (shop) body.storeDomain = shop;
+
+        const res = await fetch(`/api/timer`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || JSON.stringify(data));
+        setSuccess("Timer created");
+        // Optionally clear form
+        setProductId("");
+        setMessage("");
+      } catch (err) {
+        setError(String(err));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [productId, startDate, startTime, endDate, endTime, message, urgencyMinutes, shop]
+  );
 
   return (
-    <div style={{ padding: 24 }}>
-      <h1>Countdown Timers</h1>
-      <p>Shop: {shop || "(no shop supplied in URL)"}</p>
+    <Page title="Countdown Timers">
+      <Card sectioned>
+        <FormLayout onSubmit={handleCreate}>
+          {error && <Banner status="critical">{error}</Banner>}
+          {success && <Banner status="success">{success}</Banner>}
 
-      <section style={{ marginBottom: 24 }}>
-        <h2>Create Timer</h2>
-        <form onSubmit={createTimer}>
-          <div>
-            <label>Product ID</label>
-            <input value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} />
-          </div>
-          <div>
-            <label>Start Time (ISO)</label>
-            <input value={form.startTime} onChange={(e) => setForm({ ...form, startTime: e.target.value })} placeholder="2025-12-31T12:00:00Z" />
-          </div>
-          <div>
-            <label>End Time (ISO)</label>
-            <input value={form.endTime} onChange={(e) => setForm({ ...form, endTime: e.target.value })} placeholder="2025-12-31T13:00:00Z" />
-          </div>
-          <div>
-            <label>Message</label>
-            <input value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-          </div>
-          <div>
-            <label>Urgency Minutes</label>
-            <input type="number" value={form.urgencyMinutes} onChange={(e) => setForm({ ...form, urgencyMinutes: Number(e.target.value) })} />
-          </div>
-          <div style={{ marginTop: 8 }}>
-            <button type="submit">Create Timer</button>
-          </div>
-        </form>
-        {error && <div style={{ color: "red" }}>{error}</div>}
-      </section>
+          <TextField
+            label="Product ID"
+            value={productId}
+            onChange={setProductId}
+            required
+            helpText="The Shopify product ID this timer applies to"
+          />
 
-      <section>
-        <h2>Active Timers</h2>
-        {loading ? (
-          <div>Loading...</div>
-        ) : (
-          <table border={1} cellPadding={6}>
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Message</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Urgency (min)</th>
-              </tr>
-            </thead>
-            <tbody>
-              {timers.length === 0 && (
-                <tr>
-                  <td colSpan={5}>No active timers</td>
-                </tr>
-              )}
-              {timers.map((t) => (
-                <tr key={t._id}>
-                  <td>{t.productId}</td>
-                  <td>{t.message}</td>
-                  <td>{new Date(t.startTime).toLocaleString()}</td>
-                  <td>{new Date(t.endTime).toLocaleString()}</td>
-                  <td>{t.urgencyMinutes}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
-    </div>
+          <Stack distribution="fillEvenly">
+            <div>
+              <label style={{ display: "block", marginBottom: 8 }}>Start date</label>
+              <DatePicker
+                month={startDate.start.getMonth()}
+                year={startDate.start.getFullYear()}
+                onChange={(selected) => setStartDate(selected)}
+                selected={startDate}
+              />
+              <TextField label="Start time (HH:MM)" value={startTime} onChange={setStartTime} type="text" />
+            </div>
+
+            <div>
+              <label style={{ display: "block", marginBottom: 8 }}>End date</label>
+              <DatePicker
+                month={endDate.start.getMonth()}
+                year={endDate.start.getFullYear()}
+                onChange={(selected) => setEndDate(selected)}
+                selected={endDate}
+              />
+              <TextField label="End time (HH:MM)" value={endTime} onChange={setEndTime} type="text" />
+            </div>
+          </Stack>
+
+          <TextField label="Promotion message" value={message} onChange={setMessage} multiline />
+
+          <TextField
+            label="Urgency minutes"
+            type="number"
+            value={String(urgencyMinutes)}
+            onChange={(v) => setUrgencyMinutes(Number(v))}
+          />
+
+          <Button submit primary loading={loading} onClick={handleCreate}>
+            Save timer
+          </Button>
+        </FormLayout>
+      </Card>
+    </Page>
   );
 }

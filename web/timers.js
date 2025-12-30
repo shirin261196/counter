@@ -1,5 +1,6 @@
 import express from "express";
 import Timer from "../lib/models/timer.js";
+import { validateCreateTimer, validateUpdateTimer } from "./validators/timerValidation.js";
 
 const router = express.Router();
 
@@ -11,13 +12,13 @@ function parseDate(input) {
 }
 
 // POST /api/timer - create a timer
-router.post("/", async (req, res) => {
+router.post("/", validateCreateTimer, async (req, res) => {
   try {
     // Prefer store domain from authenticated session if available
     const storeDomain = (res.locals?.shopify?.session?.shop) || req.body.storeDomain;
     if (!storeDomain) return res.status(400).json({ error: "Missing storeDomain or not authenticated." });
 
-    const { productId, startTime, endTime, message, styles, urgencyMinutes, active, metadata } = req.body;
+  const { productId, startTime, endTime, message, styles, urgencyMinutes, active, metadata } = req.body;
 
     if (!productId) return res.status(400).json({ error: "Missing productId" });
 
@@ -72,7 +73,7 @@ router.get("/:shop", async (req, res) => {
 });
 
 // PUT /api/timer/:id - update a timer (merchant must own the timer)
-router.put("/:id", async (req, res) => {
+router.put("/:id", validateUpdateTimer, async (req, res) => {
   try {
     const id = req.params.id;
     if (!id) return res.status(400).json({ error: "Missing id parameter" });
@@ -86,7 +87,7 @@ router.put("/:id", async (req, res) => {
       return res.status(403).json({ error: "Forbidden" });
     }
 
-    const { productId, startTime, endTime, message, styles, urgencyMinutes, active, metadata } = req.body;
+  const { productId, startTime, endTime, message, styles, urgencyMinutes, active, metadata } = req.body;
 
     if (productId !== undefined) timer.productId = String(productId);
     if (startTime !== undefined) {

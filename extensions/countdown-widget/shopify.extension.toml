@@ -1,0 +1,6 @@
+name = "countdown-widget"
+type = "theme"
+version = "1.0.0"
+
+[extension]
+metafields = []

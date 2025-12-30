@@ -1,0 +1,51 @@
+{
+  "name": "Countdown block",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Timer title",
+      "default": "Your special offer ends in"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#111111"
+    },
+    {
+      "type": "select",
+      "id": "size",
+      "label": "Timer size",
+      "options": [
+        { "value": "small", "label": "Small" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "large", "label": "Large" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "select",
+      "id": "position",
+      "label": "Position",
+      "options": [
+        { "value": "top-right", "label": "Top right" },
+        { "value": "bottom-right", "label": "Bottom right" },
+        { "value": "inline", "label": "Inline" }
+      ],
+      "default": "bottom-right"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Countdown timer",
+      "category": "Promotion"
+    }
+  ]
+}

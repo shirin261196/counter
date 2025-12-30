@@ -1,0 +1,17 @@
+{%- comment -%}
+Countdown Timer block. Renders a container and loads the extension asset asynchronously.
+The block will be added to product templates via the Theme Editor.
+{%- endcomment -%}
+
+<div id="countdown-{{ block.id }}" class="countdown-widget" data-product-id="{{ product.id }}" data-shop="{{ shop.permanent_domain }}" data-block-settings='{{ block.settings | json }}'>
+  <!-- widget will render here -->
+</div>
+
+<script>
+  (function () {
+    var script = document.createElement('script');
+    script.async = true;
+    script.src = "{{ 'countdown-widget.js' | asset_url }}";
+    document.head.appendChild(script);
+  })();
+</script>

@@ -1,0 +1,27 @@
+.countdown-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+.countdown-title {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+}
+.countdown-digits {
+  font-weight: 700;
+  font-size: 18px;
+}
+.countdown-wrapper.is-urgent {
+  animation: pulse 1s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}

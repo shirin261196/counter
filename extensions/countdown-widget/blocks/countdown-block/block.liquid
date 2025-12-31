@@ -7,11 +7,17 @@ The block will be added to product templates via the Theme Editor.
   <!-- widget will render here -->
 </div>
 
+{%- comment -%} Load widget CSS and the Preact-based widget asset when available. {%- endcomment -%}
+<link rel="stylesheet" href="{{ 'countdown-widget.css' | asset_url }}" />
 <script>
   (function () {
     var script = document.createElement('script');
     script.async = true;
-    script.src = "{{ 'countdown-widget.js' | asset_url }}";
+    // Prefer the Preact-based widget for richer UI; fall back to the lightweight JS if needed.
+    var preactAsset = {{ 'countdown-widget-preact.js' | asset_url | json }};
+    var fallbackAsset = {{ 'countdown-widget.js' | asset_url | json }};
+    script.src = preactAsset || fallbackAsset;
     document.head.appendChild(script);
   })();
 </script>
+

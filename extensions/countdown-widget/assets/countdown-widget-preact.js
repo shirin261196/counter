@@ -78,20 +78,14 @@
         const remain = Math.max(0, end - now);
         const isUrgent = timer.urgencyMinutes && remain <= timer.urgencyMinutes * 60 * 1000;
 
-        const style = {
-          background: (blockSettings.background_color || (timer.styles && timer.styles.background_color)) || '#fff',
-          color: (blockSettings.text_color || (timer.styles && timer.styles.text_color)) || '#111',
-          padding: '12px 18px',
-          borderRadius: '10px',
-          display: 'inline-block',
-          boxShadow: '0 6px 18px rgba(0,0,0,0.08)'
-        };
+        const bg = (blockSettings.background_color || (timer.styles && timer.styles.background_color)) || '#fff';
+        const color = (blockSettings.text_color || (timer.styles && timer.styles.text_color)) || '#111';
 
-        if (isUrgent) style.transform = 'scale(1.02)';
+        const className = 'countdown-wrapper' + (isUrgent ? ' is-urgent' : '');
 
-        return h('div', { style }, [
-          h('div', { style: { fontSize: 12, marginBottom: 8 } }, blockSettings.title || (timer.styles && timer.styles.title) || timer.message || 'Offer ends in'),
-          h('div', { style: { fontWeight: 700, fontSize: 18 } }, formatTime(remain))
+        return h('div', { className, style: { background: bg, color } }, [
+          h('div', { className: 'countdown-title' }, (blockSettings.title || (timer.styles && timer.styles.title) || timer.message || 'Offer ends in').toString().toUpperCase()),
+          h('div', { className: 'countdown-digits' }, formatTime(remain))
         ]);
       }
 
